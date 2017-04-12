@@ -13,8 +13,9 @@ def runall(GMSHfn, SEfn, circle_type, inclusion_center_x, contact_angle, polar_a
 	sproc.call("g++ -O3 bc_flags.cc -o bc_flags", shell=True)
 
 	# Run bc_flags with the .vtk file from vtk_poly and the necessary parameters, write out to user specified file name
-	SEfn = "SEready/" + SEfn
-	sproc.call("./bc_flags zAz_temp_192038_2.vtk " + SEfn + " " + circle_type + " " + inclusion_center_x + " " + contact_angle + " " + polar_angle + " "+ outer_radius, shell=True)
+	SEfn = "fromGMSH/" + SEfn
+	sproc.call("./bc_flags zAz_temp_192038_2.vtk " + SEfn + " " + circle_type + " " + inclusion_center_x + " "
+		+ contact_angle + " " + polar_angle + " "+ outer_radius, shell=True)
 
 	# Clean-up
 	sproc.call("rm zAz_temp_192038_1.vtk", shell=True)

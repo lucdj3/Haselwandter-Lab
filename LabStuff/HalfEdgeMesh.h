@@ -525,7 +525,7 @@ void HalfEdgeMesh::write_vtk_bc(const char* ofname, const std::string circleType
 
 
   out_to_vtk<<"//Surface Evolver file generated from vtk file from GMSH\n"
-    <<"keep_originals //makes life easier\n\n"
+    <<"keep_originals //makes life easier\n\n";
 
   out_to_vtk<<"//Curvature energy definition\n"
     <<"quantity starsq energy method star_sq_mean_curvature\n\n"
@@ -679,8 +679,6 @@ void HalfEdgeMesh::write_vtk_bc(const char* ofname, const std::string circleType
 
     <<"set face color red where on_constraint 1\n"
     <<"set edge color 13 where on_constraint 2\n"
-    <<"set facet tension 0\n"
-    <<"s\n"
-    <<"q\n\n";
+    <<"set facet tension 0\n";
 }
 
