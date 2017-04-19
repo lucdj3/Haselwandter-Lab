@@ -3,6 +3,7 @@ import sys
 
 ## Main function of program ##
 def runall(GMSHfn, SEfn, circle_type, inclusion_center_x, contact_angle, polar_angle, outer_radius):
+
 	# Run GMSH with the .geo file, creating a 2-d mesh and outputting as a vtk file unlikely to overwrite another vtk
 	sproc.call("gmsh " + GMSHfn + " -2 -o zAz_temp_192038_1.vtk", shell=True)
 
@@ -10,7 +11,7 @@ def runall(GMSHfn, SEfn, circle_type, inclusion_center_x, contact_angle, polar_a
 	sproc.call("python vtk_poly.py zAz_temp_192038_1.vtk zAz_temp_192038_2.vtk", shell=True)
 
 	# Optional line to compile the c++ code before calling, given that it doesn't auto-compile like python does
-	sproc.call("g++ -O3 bc_flags.cc -o bc_flags", shell=True)
+	# sproc.call("g++ -O3 bc_flags.cc -o bc_flags", shell=True)
 
 	# Run bc_flags with the .vtk file from vtk_poly and the necessary parameters, write out to user specified file name
 	SEfn = "fromGMSH/" + SEfn

@@ -18,7 +18,7 @@ def polar_change(in_fn, out_fn, e_fn, polar_angle_change):
 	e_fn = "energy/" + e_fn
 
 	# Optional line to compile the c++ code before calling, given that it doesn't auto-compile like python does
-	sproc.call("g++ -O3 polar_change.cc -o polar_change", shell=True)
+	#sproc.call("g++ -O3 polar_change.cc -o polar_change", shell=True)
 
 	if(float(polar_angle_change) > tilt_size):
 		loop_runs = int((float(polar_angle_change)//tilt_size))
