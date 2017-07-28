@@ -24,6 +24,8 @@ double incl_thk;
 double x_plane;
 double z_plane;
 
+double total_energy;
+
 int main(int argc, char** argv){
 	if(argc != 5){
     	std::cout << "**Not enough arguments. Remember to put input file, mesh output file,"
@@ -118,8 +120,7 @@ void polar_angle_tilt(const char* inFName, const char* outFName, const char* ene
 			}
 		} else if(allTokens.size() > 3){
 			if(allTokens[1] == "Total" && allTokens[2] == "energy:"){
-
-				eFile<<allTokens[3]<<"\n";
+				total_energy = atof(allTokens[3].c_str());
 			} else{
 				oFile<<token<<"\n";
 			}
@@ -129,6 +130,8 @@ void polar_angle_tilt(const char* inFName, const char* outFName, const char* ene
 		}
 	}
 	if(!dumpQuitBool) oFile<<"E\nE\ndump\nq";
+	eFile << incl_ang << "," << total_energy << "\n";
 	iFile.close();
 	oFile.close();
+	eFile.close();
 }

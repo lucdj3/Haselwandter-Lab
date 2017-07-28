@@ -4,7 +4,7 @@ import os
 
 tilt_size = 0.05
 rec_fn = "temp_blah@#iI2#"
-evolv_cmd = "../../Evolver/evolver.exe"
+evolv_cmd = "../../Evolver/evolver.exe" # Relative path on my computer!!
 devnull = open(os.devnull, 'w')
 
 

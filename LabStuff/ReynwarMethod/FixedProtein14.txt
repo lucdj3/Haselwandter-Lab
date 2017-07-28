@@ -1,0 +1,810 @@
+//Large scale implementation of protein as a spherical cap with controllable polar and contact angle
+//Improving energy calculation to set of for analytic comparison
+//ANY TIME CHANGING proang TO 0 OR 90, search for "if" and make comment adjustments as necessary
+//0 and 180 contang are not possible, issues may arrise even as highly nearing these numbers
+
+
+//Curvature energy definition
+quantity starsq energy method star_sq_mean_curvature //global
+
+//some definitions to make things below easier
+#define phi (pi/10)
+
+//MAIN DEFINITIONS FOR CONTROLLING PROTEIN
+#define prodist (2) //distance of center of protein from edge of semicircle
+#define prorad  (1) //radius of the circle that will represent the protein
+#define proang  (0*pi/180) //angle between z-axis and "polar" axis of protein
+#define contang (15*pi/180) //angle of contact between protein and membrane
+
+//defining values for the "sphere" that a portion of will be used to represent the protein
+#define sphrad  (prorad/sin(contang)) //radius of sphere
+
+#define sphcen2procen (sphrad*cos(contang)) //distance between center of sphere and center of "protein cap"
+#define sphhght (-cos(proang+contang)*sphrad) //height of sphere center from x-y-plane
+#define sphdist (prodist-sphcen2procen*sin(proang)) //distance of sphere's center from x-z plane
+#define prohght (prorad*sin(proang)) //height of protein center
+#define prothk  (sphrad-sphcen2procen) //thickness of protein (distance from center on plane of contact circle to top of protein cap)
+
+
+//defining values/equations for the plane that holds the contact circle between protein and membrane
+//yplane*(y-prodist) + zplane*(z-prohght) = 0
+#define yplane (sin(proang))
+#define zplane (cos(proang))
+
+//start making values for circle of protein contacting the membrane
+#define prox1 (prorad)
+#define prox2 (prorad/2)
+#define prox3 (-prox2)
+#define prox4 (-prorad)
+#define prox5 (-prox2)
+#define prox6 (prox2)
+
+#define y2sqandz2sq (prorad^2-prox2^2) //y^2 + z^2 in the sphere's equation for 2nd point
+
+//IF proang is 90, comment out this next line and uncomment y2sq=0 line
+#define y2sq (y2sqandz2sq/(1+yplane^2/zplane^2)) //y^2 in sphere's equation for 2nd point
+//#define y2sq (0)
+
+//IF proang is 0, comment out this next line and uncomment z2sq=0 line
+//#define z2sq (y2sqandz2sq/(1+zplane^2/yplane^2)) //z^2 in sphere's equation for 2nd point
+#define z2sq (0)
+
+
+#define proy1 (prodist)
+#define proy2 (sqrt(y2sq)+prodist)
+#define proy3 (proy2)
+#define proy4 (prodist)
+#define proy5 (-sqrt(y2sq)+prodist)
+#define proy6 (proy5)
+
+#define proz1 (prohght)
+#define proz2 (-sqrt(z2sq)+prohght)
+#define proz3 (proz2)
+#define proz4 (prohght)
+#define proz5 (sqrt(z2sq)+prohght)
+#define proz6 (proz5)
+
+//definitions for intermediary on protein cap
+
+#define upprodist (prodist+2/5*yplane*prothk) //distance from x-z-plane of center of circle that will be used to define intermediary on the upper of the protein cap
+#define upprohght (prohght+2/5*zplane*prothk) //height from x-y-plane of center of circle that will be used to define intermediary on the upper of the protein cap
+//these values will be the same as the points on the circle where x is at a maximum and minimum so:
+#define upprorad (sqrt(sphrad^2-((upprodist-sphdist)^2+(upprohght-sphhght)^2)))
+
+#define upprox1 (upprorad)
+#define upprox2 (upprox1/2)
+#define upprox3 (-upprox2)
+#define upprox4 (-upprox1)
+#define upprox5 (upprox3)
+#define upprox6 (upprox2)
+
+#define upy2sqandz2sq (upprorad^2-upprox2^2) //y^2 + z^2 in the circles equation for 2nd point
+
+//IF proang is 90, comment out this next line and uncomment y2sq=0 line
+#define upy2sq (upy2sqandz2sq/(1+yplane^2/zplane^2)) //y^2 in sphere's equation for 2nd point
+//#define upy2sq (0)
+
+//IF proang is 0, comment out this next line and uncomment z2sq=0 line
+//#define upz2sq (upy2sqandz2sq/(1+zplane^2/yplane^2)) //z^2 in sphere's equation for 2nd point
+#define upz2sq (0)
+
+
+#define upproy1 (upprodist)
+#define upproy2 (sqrt(upy2sq)+upprodist)
+#define upproy3 (upproy2)
+#define upproy4 (upprodist)
+#define upproy5 (-sqrt(upy2sq)+upprodist)
+#define upproy6 (upproy5)
+
+#define upproz1 (upprohght)
+#define upproz2 (-sqrt(upz2sq)+upprohght)
+#define upproz3 (upproz2)
+#define upproz4 (upprohght)
+#define upproz5 (sqrt(upz2sq)+upprohght)
+#define upproz6 (upproz5)
+
+
+
+//Some definitions for intermediary circle
+#define protoedge (proy5) //distance from near edge of protein to x-z-plane
+#define cirrad (prorad+protoedge/2) //radius of circle intermediary
+
+#define cirx1 (cirrad)
+#define cirx2 (cirx1/2)
+#define cirx3 (-cirx2)
+#define cirx4 (-cirx1)
+#define cirx5 (-cirx2)
+#define cirx6 (cirx2)
+
+#define ciry1 ((proy2+zplane*protoedge/2+protoedge/2)/2)
+#define ciry2 (proy2+zplane*protoedge/2)
+#define ciry3 (ciry2)
+#define ciry4 (ciry1)
+#define ciry5 (proy5/2)
+#define ciry6 (protoedge/2)
+
+#define cirz1 ((proz2-yplane*protoedge/2+proz5)/2)
+#define cirz2 (proz2-yplane*protoedge/2)
+#define cirz3 (cirz2)
+#define cirz4 (cirz1)
+#define cirz5 (proz5)
+#define cirz6 (cirz5)
+
+//Some definitions for circle that touches x-z-plane
+
+#define pcirx1 (prorad+protoedge)
+#define pcirx2 (pcirx1/2)
+#define pcirx3 (-pcirx2)
+#define pcirx4 (-pcirx1)
+#define pcirx5 (-pcirx2)
+#define pcirx6 (pcirx2)
+
+#define pciry1 ((proy2+zplane*protoedge)/2)
+#define pciry2 (proy2+zplane*protoedge)
+#define pciry3 (pciry2)
+#define pciry4 (pciry1)
+#define pciry5 (0)
+#define pciry6 (pciry5)
+
+#define pcirz1 ((proz2-yplane*protoedge+cirz5)/2)
+#define pcirz2 (proz2-yplane*protoedge)
+#define pcirz3 (pcirz2)
+#define pcirz4 (pcirz1)
+#define pcirz5 (cirz5)
+#define pcirz6 (pcirz5)
+
+//definitions for next intermediary (intermediary3)
+
+#define int3x1 (pcirx1*2)
+#define int3x2 (int3x1/2)
+#define int3x3 (-int3x2)
+#define int3x4 (-int3x1)
+#define int3x5 (-int3x2)
+#define int3x6 (int3x2)
+
+#define int3y1 (pciry1*2)
+#define int3y2 (pciry2*2)
+#define int3y3 (int3y2)
+#define int3y4 (int3y1)
+#define int3y5 (0)
+#define int3y6 (int3y5)
+
+#define int3z1 (0)
+#define int3z2 (0)
+#define int3z3 (0)
+#define int3z4 (0)
+#define int3z5 (pcirz5/2)
+#define int3z6 (pcirz6/2)
+
+//definitions for next intermediary (intermediary4)
+
+#define int4x1 (int3x1*2)
+#define int4x2 (int4x1/2)
+#define int4x3 (-int4x2)
+#define int4x4 (-int4x1)
+#define int4x5 (int3x5*3)
+#define int4x6 (int3x6*3)
+
+#define int4y1 (int3y1*2)
+#define int4y2 (int3y2*2)
+#define int4y3 (int4y2)
+#define int4y4 (int4y1)
+#define int4y5 (0)
+#define int4y6 (int4y5)
+
+#define int4z1 (0)
+#define int4z2 (0)
+#define int4z3 (0)
+#define int4z4 (0)
+#define int4z5 (0)
+#define int4z6 (0)
+
+//definitions for next intermediary (intermediary5)
+
+#define int5x1 (int4x1*2)
+#define int5x2 (int5x1/2)
+#define int5x3 (-int5x2)
+#define int5x4 (-int5x1)
+#define int5x5 (int4x5*3)
+#define int5x6 (int4x6*3)
+
+#define int5y1 (int4y1*2)
+#define int5y2 (int4y2*2)
+#define int5y3 (int5y2)
+#define int5y4 (int5y1)
+#define int5y5 (0)
+#define int5y6 (int5y5)
+
+#define int5z1 (0)
+#define int5z2 (0)
+#define int5z3 (0)
+#define int5z4 (0)
+#define int5z5 (0)
+#define int5z6 (0)
+
+
+
+//Constraints for Protein
+
+constraint 1 //"sphere" for which the cap represents the protein
+formula: x^2 + (y-sphdist)^2 + (z-sphhght)^2 = (sphrad)^2
+
+constraint 2 //plane that the base of protein is constrainted to
+formula: yplane*(y-prodist) + zplane*(z-prohght) = 0
+
+parameter flutey_count=3
+constraint 3 //invisible flutes that prevent circle vertices of protein from "short-circuiting"
+formula: sin(flutey_count*atan2(zplane*(y-prodist)-yplane*(z-prohght),x))
+
+
+//any other constraints
+//constraints for outer massive membrane
+constraint 5
+formula: x^2 + y^2 = 104857600
+
+parameter flute_count = 10
+constraint 6
+formula: sin(flute_count*atan2(y,x))
+
+constraint 7
+formula: 0 = 0
+
+constraint 8
+formula: y = 0
+
+
+
+Vertices
+
+228  0       sphdist    sphhght
+229  sphrad  sphdist    sphhght
+210 -sphrad  sphdist    sphhght
+211 0        sphdist+yplane*sphrad  sphhght+zplane*sphrad
+212 0        sphdist-yplane*sphrad  sphhght-zplane*sphrad
+213 0        sphdist+zplane*sphrad  sphhght-yplane*sphrad
+214 0        sphdist-zplane*sphrad  sphhght+yplane*sphrad
+
+220 0 upprodist upprohght
+221 upprorad upprodist upprohght
+
+222 0 prodist prohght
+223 prorad prodist prohght
+
+
+//Protein base and cap (0)
+1 prox1 proy1 proz1 constraint 1,2,3
+2 prox2 proy2 proz2 constraint 1,2,3
+3 prox3 proy3 proz3 constraint 1,2,3
+4 prox4 proy4 proz4 constraint 1,2,3
+5 prox5 proy5 proz5 constraint 1,2,3
+6 prox6 proy6 proz6 constraint 1,2,3
+//intermediary on protein cap to improve initial triangulation
+7  upprox1 upproy1 upproz1 constraint 1,3 fixed
+8  upprox2 upproy2 upproz2 constraint 1,3 fixed
+9  upprox3 upproy3 upproz3 constraint 1,3 fixed
+10 upprox4 upproy4 upproz4 constraint 1,3 fixed
+11 upprox5 upproy5 upproz5 constraint 1,3 fixed
+12 upprox6 upproy6 upproz6 constraint 1,3 fixed
+
+13 0  prodist+prothk*yplane  prohght+prothk*zplane  constraint 1 fixed
+
+
+//first intermediary, immediately outside the protein circle (1)
+18 cirx1 ciry1 cirz1
+19 cirx2 ciry2 cirz2
+20 cirx3 ciry3 cirz3
+21 cirx4 ciry4 cirz4
+22 cirx5 ciry5 cirz5
+23 cirx6 ciry6 cirz6
+
+//first merger onto y = 0 plane (2)
+24 pcirx1 pciry1 pcirz1
+25 pcirx2 pciry2 pcirz2
+26 pcirx3 pciry3 pcirz3
+27 pcirx4 pciry4 pcirz4
+28 pcirx5 pciry5 pcirz5 constraint 8
+29 pcirx6 pciry6 pcirz6 constraint 8
+
+//another intermediary merged to y = 0 plane (3)
+30 int3x1 int3y1 int3z1
+31 int3x2 int3y2 int3z2
+32 int3x3 int3y3 int3z3
+33 int3x4 int3y4 int3z4
+34 int3x5 int3y5 int3z5 constraint 8
+35 int3x6 int3y6 int3z6 constraint 8
+
+//another intermediary merged to y = 0 plane (4)
+36 int4x1 int4y1 int4z1
+37 int4x2 int4y2 int4z2
+38 int4x3 int4y3 int4z3
+39 int4x4 int4y4 int4z4
+40 int4x5 int4y5 int4z5 constraint 8
+41 int4x6 int4y6 int4z6 constraint 8
+
+//another intermediary merged to y = 0 plane (5)
+42 int5x1 int5y1 int5z1
+43 int5x2 int5y2 int5z2
+44 int5x3 int5y3 int5z3
+45 int5x4 int5y4 int5z4
+46 int5x5 int5y5 int5z5 constraint 8
+47 int5x6 int5y6 int5z6 constraint 8
+
+//another, more stable intermediary (6)
+48 40*cos(2*phi)  40*sin(2*phi)  0
+49 40*cos(4*phi)  40*sin(4*phi)  0
+50 40*cos(6*phi)  40*sin(6*phi)  0
+51 40*cos(8*phi)  40*sin(8*phi)  0
+52 40*cos(10*phi) 40*sin(10*phi) 0 constraint 8
+53 40*cos(0*phi)  40*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (7)
+54 80*cos(2*phi)  80*sin(2*phi)  0
+55 80*cos(4*phi)  80*sin(4*phi)  0
+56 80*cos(6*phi)  80*sin(6*phi)  0
+57 80*cos(8*phi)  80*sin(8*phi)  0
+58 80*cos(10*phi) 80*sin(10*phi) 0 constraint 8
+59 80*cos(0*phi)  80*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (8)
+60 160*cos(2*phi)  160*sin(2*phi)  0
+61 160*cos(4*phi)  160*sin(4*phi)  0
+62 160*cos(6*phi)  160*sin(6*phi)  0
+63 160*cos(8*phi)  160*sin(8*phi)  0
+64 160*cos(10*phi) 160*sin(10*phi) 0 constraint 8
+65 160*cos(0*phi)  160*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (9)
+66 320*cos(2*phi)  320*sin(2*phi)  0
+67 320*cos(4*phi)  320*sin(4*phi)  0
+68 320*cos(6*phi)  320*sin(6*phi)  0
+69 320*cos(8*phi)  320*sin(8*phi)  0
+70 320*cos(10*phi) 320*sin(10*phi) 0 constraint 8
+71 320*cos(0*phi)  320*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (10)
+72 640*cos(2*phi)  640*sin(2*phi)  0
+73 640*cos(4*phi)  640*sin(4*phi)  0
+74 640*cos(6*phi)  640*sin(6*phi)  0
+75 640*cos(8*phi)  640*sin(8*phi)  0
+76 640*cos(10*phi) 640*sin(10*phi) 0 constraint 8
+77 640*cos(0*phi)  640*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (11)
+78 1280*cos(2*phi)  1280*sin(2*phi)  0
+79 1280*cos(4*phi)  1280*sin(4*phi)  0
+80 1280*cos(6*phi)  1280*sin(6*phi)  0
+81 1280*cos(8*phi)  1280*sin(8*phi)  0
+82 1280*cos(10*phi) 1280*sin(10*phi) 0 constraint 8
+83 1280*cos(0*phi)  1280*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (12)
+84 2560*cos(2*phi)  2560*sin(2*phi)  0
+85 2560*cos(4*phi)  2560*sin(4*phi)  0
+86 2560*cos(6*phi)  2560*sin(6*phi)  0
+87 2560*cos(8*phi)  2560*sin(8*phi)  0
+88 2560*cos(10*phi) 2560*sin(10*phi) 0 constraint 8
+89 2560*cos(0*phi)  2560*sin(0*phi)  0 constraint 8
+
+//another, more stable intermediary (13)
+90 5120*cos(2*phi)  5120*sin(2*phi)  0
+91 5120*cos(4*phi)  5120*sin(4*phi)  0
+92 5120*cos(6*phi)  5120*sin(6*phi)  0
+93 5120*cos(8*phi)  5120*sin(8*phi)  0
+94 5120*cos(10*phi) 5120*sin(10*phi) 0 constraint 8
+95 5120*cos(0*phi)  5120*sin(0*phi)  0 constraint 8
+
+//outer edge of membrane vertices
+101 10240*cos(2*phi)  10240*sin(2*phi)  0 constraint 5,6,7
+102 10240*cos(4*phi)  10240*sin(4*phi)  0 constraint 5,6,7
+103 10240*cos(6*phi)  10240*sin(6*phi)  0 constraint 5,6,7
+104 10240*cos(8*phi)  10240*sin(8*phi)  0 constraint 5,6,7
+105 10240*cos(10*phi) 10240*sin(12*phi) 0 constraint 5,7,8
+106 10240*cos(0*phi)  10240*sin(0*phi)  0 constraint 5,7,8
+
+
+
+Edges
+/*key:
+S(single layer)/D(double, layer-to-layer connection)
+NUMBER(1 is protein circle, 100 is edge of membrane,
+- to signify from one layer to the next ie 2-3)
+*/
+
+213 228 229 color (green) BARE
+214 228 210 color (green) BARE
+215 228 211 color (green) BARE
+216 228 212 color (green) BARE
+217 228 213 color (green) BARE
+218 228 214 color (green) BARE
+
+224 220 221 color (12) BARE
+225 222 223 color (11) BARE
+
+//inner protein circle (ES0)
+1   1  2 constraint 1,2,3
+2   2  3 constraint 1,2,3
+3   3  4 constraint 1,2,3
+4   4  5 constraint 1,2,3
+5   5  6 constraint 1,2,3
+6   6  1 constraint 1,2,3
+
+//making the protein "cap"
+7   7  8 constraint 1 fixed //color (white)
+8   8  9 constraint 1 fixed //color (white)
+9   9 10 constraint 1 fixed //color (white)
+10 10 11 constraint 1 fixed //color (white)
+11 11 12 constraint 1 fixed //color (white)
+12 12  7 constraint 1 fixed //color (white)
+
+13 1  7 constraint 1 fixed //color (white)
+14 2  8 constraint 1 fixed //color (white)
+15 3  9 constraint 1 fixed //color (white)
+16 4 10 constraint 1 fixed //color (white)
+17 5 11 constraint 1 fixed //color (white)
+18 6 12 constraint 1 fixed //color (white)
+
+20  7 13 constraint 1 fixed //color (white)
+21  8 13 constraint 1 fixed //color (white)
+22  9 13 constraint 1 fixed //color (white)
+23 10 13 constraint 1 fixed //color (white)
+24 11 13 constraint 1 fixed //color (white)
+25 12 13 constraint 1 fixed //color (white)
+
+
+//first intermediary to connect protein circle to (ES1)
+28 18 19
+29 19 20
+30 20 21
+31 21 22
+32 22 23
+33 23 18
+
+//first merger to plane connections and on plane parts (ES2)
+34 24 25
+35 25 26
+36 26 27
+37 27 28
+38 28 29 constraint 8
+39 29 24
+
+//next intermediary (ES3)
+40 30 31
+41 31 32
+42 32 33
+43 33 34
+44 35 30
+
+//next intermediary (ES4)
+45 36 37
+46 37 38
+47 38 39
+48 39 40
+49 41 36
+
+//next intermediary (ES5)
+50 42 43
+51 43 44
+52 44 45
+53 45 46
+54 47 42
+
+//next intermediary (ES6)
+55 48 49
+56 49 50
+57 50 51
+58 51 52
+59 53 48
+
+//next intermediary (ES7)
+60 54 55
+61 55 56
+62 56 57
+63 57 58
+64 59 54
+
+//next intermediary (ES8)
+65 60 61
+66 61 62
+67 62 63
+68 63 64
+69 65 60
+
+//next intermediary (ES9)
+70 66 67
+71 67 68
+72 68 69
+73 69 70
+74 71 66
+
+//next intermediary (ES10)
+75 72 73
+76 73 74
+77 74 75
+78 75 76
+79 77 72
+
+//next intermediary (ES11)
+80 78 79
+81 79 80
+82 80 81
+83 81 82
+84 83 78
+
+//next intermediary (ES12)
+85 84 85
+86 85 86
+87 86 87
+88 87 88
+89 89 84
+
+//next intermediary (ES13)
+90 90 91
+91 91 92
+92 92 93
+93 93 94
+94 95 90
+
+//outer membrane connections (ES100)
+1001 101 102 constraint 5,6,7
+1002 102 103 constraint 5,6,7
+1003 103 104 constraint 5,6,7
+1004 104 105 constraint 5,6,7
+1005 106 101 constraint 5,6,7
+
+
+//layer to layer connections:
+//Protein to first circle intermediary (ED0-1)
+101  1 18
+102  2 19
+103  3 20
+104  4 21
+105  5 22
+106  6 23
+
+//Circle intermediary to next intermediary (ED1-2)
+107 18 24
+108 19 25
+109 20 26
+110 21 27
+111 22 28
+112 23 29
+
+//2nd level to 3rd level (ED2-3)
+113 24 30
+114 25 31
+115 26 32
+116 27 33
+117 28 34 constraint 8
+118 29 35 constraint 8
+
+//3rd level to 4th level (ED3-4)
+119 30 36
+120 31 37
+121 32 38
+122 33 39
+123 34 40 constraint 8
+124 35 41 constraint 8
+
+//4th level to 5th level (ED4-5)
+125 36 42
+126 37 43
+127 38 44
+128 39 45
+129 40 46 constraint 8
+130 41 47 constraint 8
+
+//5th level to 6th level (ED5-6)
+131 42 48
+132 43 49
+133 44 50
+134 45 51
+135 46 52 constraint 8
+136 47 53 constraint 8
+
+//6th level to 7th level (ED6-7)
+137 48 54
+138 49 55
+139 50 56
+140 51 57
+141 52 58 constraint 8
+142 53 59 constraint 8
+
+//7th level to 8th level (ED7-8)
+143 54 60
+144 55 61
+145 56 62
+146 57 63
+147 58 64 constraint 8
+148 59 65 constraint 8
+
+//8th level to 9th level (ED8-9)
+149 60 66
+150 61 67
+151 62 68
+152 63 69
+153 64 70 constraint 8
+154 65 71 constraint 8
+
+//9th level to 10th level (ED9-10)
+155 66 72
+156 67 73
+157 68 74
+158 69 75
+159 70 76 constraint 8
+160 71 77 constraint 8
+
+//10th level to 11th level (ED10-11)
+161 72 78
+162 73 79
+163 74 80
+164 75 81
+165 76 82 constraint 8
+166 77 83 constraint 8
+
+//11th level to 12th level (ED11-12)
+167 78 84
+168 79 85
+169 80 86
+170 81 87
+171 82 88 constraint 8
+172 83 89 constraint 8
+
+//12th level to 13th level (ED12-13)
+173 84 90
+174 85 91
+175 86 92
+176 87 93
+177 88 94 constraint 8
+178 89 95 constraint 8
+
+//9th level to outer membrane (ED9-100)
+201 90 101
+202 91 102
+203 92 103
+204 93 104
+205 94 105 constraint 8
+206 95 106 constraint 8
+
+
+
+Faces
+/*key:
+NUMBER(1 is protein circle, 100 is edge of membrane,
+- to signify from one layer to the next ie 2-3)
+*/
+
+//Spherical cap (F0)
+1   1 14  -7 -13 constraint 1 TENSION 0 fixed //color (red)
+2   2 15  -8 -14 constraint 1 TENSION 0 fixed //color (red)
+3   3 16  -9 -15 constraint 1 TENSION 0 fixed //color (red)
+4   4 17 -10 -16 constraint 1 TENSION 0 fixed //color (red)
+5   5 18 -11 -17 constraint 1 TENSION 0 fixed //color (red)
+6   6 13 -12 -18 constraint 1 TENSION 0 fixed //color (red)
+7   7 21 -20 constraint 1 TENSION 0 fixed //color (red)
+8   8 22 -21 constraint 1 TENSION 0 fixed //color (red)
+9   9 23 -22 constraint 1 TENSION 0 fixed //color (red)
+10 10 24 -23 constraint 1 TENSION 0 fixed //color (red)
+11 11 25 -24 constraint 1 TENSION 0 fixed //color (red)
+12 12 20 -25 constraint 1 TENSION 0 fixed //color (red)
+
+//Two Circles (F0-1)
+13 28 -102 -1 101 TENSION 0
+14 29 -103 -2 102 TENSION 0
+15 30 -104 -3 103 TENSION 0
+16 31 -105 -4 104 TENSION 0
+17 32 -106 -5 105 TENSION 0
+18 33 -101 -6 106 TENSION 0
+
+//Circle to edge circle constraint intermediary (F1-2)
+19 34 -108 -28 107 TENSION 0
+20 35 -109 -29 108 TENSION 0
+21 36 -110 -30 109 TENSION 0
+22 37 -111 -31 110 TENSION 0
+23 38 -112 -32 111 TENSION 0
+24 39 -107 -33 112 TENSION 0
+
+//Edge circle constraint intermediary to next intermediary (F2-3)
+25 40 -114 -34 113 TENSION 0
+26 41 -115 -35 114 TENSION 0
+27 42 -116 -36 115 TENSION 0
+28 43 -117 -37 116 TENSION 0
+29 44 -113 -39 118 TENSION 0
+
+//Intermediary 3 to next intermediary (F3-4)
+30 45 -120 -40 119 TENSION 0
+31 46 -121 -41 120 TENSION 0
+32 47 -122 -42 121 TENSION 0
+33 48 -123 -43 122 TENSION 0
+34 49 -119 -44 124 TENSION 0
+
+//Intermediary 4 to next intermediary (F4-5)
+35 50 -126 -45 125 TENSION 0
+36 51 -127 -46 126 TENSION 0
+37 52 -128 -47 127 TENSION 0
+38 53 -129 -48 128 TENSION 0
+39 54 -125 -49 130 TENSION 0
+
+//Intermediary 5 to next intermediary (F5-6)
+40 55 -132 -50 131 TENSION 0
+41 56 -133 -51 132 TENSION 0
+42 57 -134 -52 133 TENSION 0
+43 58 -135 -53 134 TENSION 0
+44 59 -131 -54 136 TENSION 0
+
+//Intermediary 6 to next intermediary (F6-7)
+45 60 -138 -55 137 TENSION 0
+46 61 -139 -56 138 TENSION 0
+47 62 -140 -57 139 TENSION 0
+48 63 -141 -58 140 TENSION 0
+49 64 -137 -59 142 TENSION 0
+
+//Intermediary 7 to next intermediary (F7-8)
+50 65 -144 -60 143 TENSION 0
+51 66 -145 -61 144 TENSION 0
+52 67 -146 -62 145 TENSION 0
+53 68 -147 -63 146 TENSION 0
+54 69 -143 -64 148 TENSION 0
+
+//Intermediary 8 to next intermediary (F8-9)
+55 70 -150 -65 149 TENSION 0
+56 71 -151 -66 150 TENSION 0
+57 72 -152 -67 151 TENSION 0
+58 73 -153 -68 152 TENSION 0
+59 74 -149 -69 154 TENSION 0
+
+//Intermediary 9 to next intermediary (F9-10)
+60 75 -156 -70 155 TENSION 0
+61 76 -157 -71 156 TENSION 0
+62 77 -158 -72 157 TENSION 0
+63 78 -159 -73 158 TENSION 0
+64 79 -155 -74 160 TENSION 0
+
+//Intermediary 10 to next intermediary (F10-11)
+65 80 -162 -75 161 TENSION 0
+66 81 -163 -76 162 TENSION 0
+67 82 -164 -77 163 TENSION 0
+68 83 -165 -78 164 TENSION 0
+69 84 -161 -79 166 TENSION 0
+
+//Intermediary 11 to next intermediary (F11-12)
+70 85 -168 -80 167 TENSION 0
+71 86 -169 -81 168 TENSION 0
+72 87 -170 -82 169 TENSION 0
+73 88 -171 -83 170 TENSION 0
+74 89 -167 -84 172 TENSION 0
+
+//Intermediary 12 to next intermediary (F12-13)
+75 90 -174 -85 173 TENSION 0
+76 91 -175 -86 174 TENSION 0
+77 92 -176 -87 175 TENSION 0
+78 93 -177 -88 176 TENSION 0
+79 94 -173 -89 178 TENSION 0
+
+//Intermediary 9 to Outer Membrane edge (F9-100)
+101 1001 -202 -90 201 TENSION 0
+102 1002 -203 -91 202 TENSION 0
+103 1003 -204 -92 203 TENSION 0
+104 1004 -205 -93 204 TENSION 0
+105 1005 -201 -94 206 TENSION 0
+
+
+
+read
+
+r :::= { flute_count *= 2; flutey_count *= 2; 'r'; set vertex starsq where not on_constraint 1; set vertex starsq where on_constraint 2; 'e'  }
+
+u :::= { 'u'; set vertex starsq where not on_constraint 1; set vertex starsq where on_constraint 2; 'e' }
+
+SUPPRESS_WARNING 1792
+
+set vertex starsq where not on_constraint 1
+set vertex starsq where on_constraint 2
+
+set face color red where on_constraint 1
+set edge color 13 where on_constraint 2
+
+s
+4d
+2r
+5z
+q

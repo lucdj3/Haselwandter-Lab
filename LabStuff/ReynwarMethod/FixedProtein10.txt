@@ -1,0 +1,266 @@
+//some definitions to make things below easier
+#define phi (pi/12)
+#define theta (pi/4)
+
+#define prodist (15) //distance of center of protein from edge of semicircle
+#define prorad  (10) //radius of the circle that will represent the protein
+#define proang  (75) //angle between z-axis and "polar" axis of protein
+#define prohght (prorad*sin(pi*proang/180)) //height of the center of protein from x-y plane
+#define contang (90) //angle of contact between protein and membrane
+
+//start making values for circle of protein contacting the membrane
+#define prox1 (prorad)
+#define prox2 (prorad/2)
+#define prox3 (-prox2)
+#define prox4 (-prorad)
+#define prox5 (-prox2)
+#define prox6 (prox2)
+
+#define yplane (sin(pi*proang/180)) //y-coefficient in a(y-prodist)+b(z-prohght)=0, plane parallel to base of protein
+#define zplane (cos(pi*proang/180)) //z-coefficient in a(y-prodist)+b(z-prohght)=0, plane parallel to base of protein
+//normal vector for above plane: (0,zplane,yplane)
+//equation for line that goes up through center of protein: zplane(y-prodist)=yplane(z-prohght)
+
+
+#define y2sqandz2sq (prorad^2-prox2^2) //y^2 + z^2 in the sphere's equation for 2nd point
+
+//IF proang is 90, comment out this next line and uncomment y2sq=0 line
+#define y2sq (y2sqandz2sq/(1+yplane^2/zplane^2)) //y^2 in sphere's equation for 2nd point
+//#define y2sq (0)
+
+//IF proang is 0, comment out this next line and uncomment z2sq=0 line
+#define z2sq (y2sqandz2sq/(1+zplane^2/yplane^2)) //z^2 in sphere's equation for 2nd point
+//#define z2sq (0)
+
+#define proy1 (prodist)
+#define proy2 (sqrt(y2sq)+prodist)
+#define proy3 (proy2)
+#define proy4 (prodist)
+#define proy5 (-sqrt(y2sq)+prodist)
+#define proy6 (proy5)
+
+#define proz1 (prohght)
+#define proz2 (-sqrt(z2sq)+prohght)
+#define proz3 (proz2)
+#define proz4 (prohght)
+#define proz5 (sqrt(z2sq)+prohght)
+#define proz6 (proz5)
+
+//STILL NEED TO ADD WHATEVER NECESSARY FOR EASILY CONTROLING CONTACT ANGLE
+
+//Curvature energy definition
+quantity starsq energy method star_sq_mean_curvature global
+
+
+//Constraints for Protein
+
+constraint 1 //"cylinder" in which the protein is centered and on which it has outer edges on
+formula: (yplane*prohght-yplane*z-zplane*prodist+zplane*y)^2+(zplane*x)^2+(yplane*x)^2=(prorad)^2*(yplane^2+zplane^2)
+
+constraint 2 //plane that the base of protein is constrainted to
+formula: yplane*(y-prodist) + zplane*(z-prohght) = 0
+
+parameter flutey_count=3
+constraint 3 //invisible flutes that prevent circle vertices of protein from "short-circuiting"
+formula: sin(flutey_count*atan2(zplane*(y-prodist)-yplane*(z-prohght),x))
+
+
+//any other constraints
+//constraints for outer massive membrane
+constraint 5
+formula: x^2 + y^2 = 104857600
+
+parameter flute_count = 12
+constraint 6
+formula: sin(flute_count*atan2(y,x))
+
+constraint 7
+formula: z = 0
+
+constraint 8
+formula: y = 0
+
+
+
+
+Vertices
+
+//Protein base
+1 prox1 proy1 proz1 constraint 1,2,3
+2 prox2 proy2 proz2 constraint 1,2,3
+3 prox3 proy3 proz3 constraint 1,2,3
+4 prox4 proy4 proz4 constraint 1,2,3
+5 prox5 proy5 proz5 constraint 1,2,3
+6 prox6 proy6 proz6 constraint 1,2,3
+//Upper part of protein to create contact angle
+7  prox1 proy1+8*yplane proz1+8*zplane constraint 1,3 fixed
+8  prox2 proy2+8*yplane proz2+8*zplane constraint 1,3 fixed
+9  prox3 proy3+8*yplane proz3+8*zplane constraint 1,3 fixed
+10 prox4 proy4+8*yplane proz4+8*zplane constraint 1,3 fixed
+11 prox5 proy5+8*yplane proz5+8*zplane constraint 1,3 fixed
+12 prox6 proy6+8*yplane proz6+8*zplane constraint 1,3 fixed
+
+//outer edge of membrane vertices
+14 10240*cos(0*phi)  10240*sin(0*phi)  0 constraint 5,7,8
+15 10240*cos(4*phi)  10240*sin(4*phi)  0 constraint 5,6,7
+16 10240*cos(8*phi)  10240*sin(8*phi)  0 constraint 5,6,7
+17 10240*cos(12*phi) 10240*sin(12*phi) 0 constraint 5,7,8
+
+//first intermediary, immediately outside the protein circle
+18 12*cos(0*phi)  12*sin(0*phi)+15  1
+19 12*cos(4*phi)  12*sin(4*phi)+15  1
+20 12*cos(8*phi)  12*sin(8*phi)+15  1
+21 12*cos(12*phi) 12*sin(12*phi)+15 1
+22 12*cos(16*phi) 12*sin(16*phi)+15 1
+23 12*cos(20*phi) 12*sin(20*phi)+15 1
+
+//first merger onto y = 0 plane
+24 40*cos(0*phi)  40*sin(0*phi)  0 constraint 8
+25 40*cos(4*phi)  40*sin(4*phi)  0
+26 40*cos(8*phi)  40*sin(8*phi)  0
+27 40*cos(12*phi) 40*sin(12*phi) 0 constraint 8
+28 -15            0              0 constraint 8
+29 15             0              0 constraint 8
+
+//another intermediary merged to y = 0 plane (160 radius)
+30 160*cos(0*phi)  160*sin(0*phi)  0 constraint 8
+31 160*cos(4*phi)  160*sin(4*phi)  0
+32 160*cos(8*phi)  160*sin(8*phi)  0
+33 160*cos(12*phi) 160*sin(12*phi) 0 constraint 8
+
+
+
+Edges
+/*key:
+S(single layer)/D(double, layer-to-layer connection)
+NUMBER(1 is protein circle, 100 is edge of membrane,
+- to signify from one layer to the next ie 2-3)
+*/
+
+//inner protein circle (ES1)
+1   1  2 constraint 1,2,3
+2   2  3 constraint 1,2,3
+3   3  4 constraint 1,2,3
+4   4  5 constraint 1,2,3
+5   5  6 constraint 1,2,3
+6   6  1 constraint 1,2,3
+
+//making the protein "cap"
+7   7  8 constraint 1,3 fixed// no_refine
+8   8  9 constraint 1,3 fixed// no_refine
+9   9 10 constraint 1,3 fixed// no_refine
+10 10 11 constraint 1,3 fixed// no_refine
+11 11 12 constraint 1,3 fixed// no_refine
+12 12  7 constraint 1,3 fixed// no_refine
+13  1  7 constraint 1,3 fixed// no_refine
+14  2  8 constraint 1,3 fixed// no_refine
+15  3  9 constraint 1,3 fixed// no_refine
+16  4 10 constraint 1,3 fixed// no_refine
+17  5 11 constraint 1,3 fixed// no_refine
+18  6 12 constraint 1,3 fixed// no_refine
+
+//outer membrane connections (ES100)
+25 14 15 constraint 5,6,7
+26 15 16 constraint 5,6,7
+27 16 17 constraint 5,6,7
+
+//first intermediary to connect protein circle to (ES2)
+28 18 19
+29 19 20
+30 20 21
+31 21 22
+32 22 23
+33 23 18
+
+//first merger to plane connections and on plane parts (ES3)
+34 24 25
+35 25 26
+36 26 27
+37 27 28 constraint 8
+38 28 29 constraint 8
+39 29 24 constraint 8
+
+//next intermediary (ES4)
+40 30 31
+41 31 32
+42 32 33
+
+
+//layer to layer connections:
+//Protein to first circle intermediary (ED1-2)
+101  1 18
+102  2 19
+103  3 20
+104  4 21
+105  5 22
+106  6 23
+
+//Circle intermediary to next intermediary (ED2-3)
+107 18 24
+108 19 25
+109 20 26
+110 21 27
+111 22 28
+112 23 29
+
+//3rd level to 4th level (ED3-4)
+113 24 30 constraint 8
+114 25 31
+115 26 32
+116 27 33 constraint 8
+
+//4th level to outer membrane (ED4-100)
+117 30 14 constraint 8
+118 31 15
+119 32 16
+120 33 17 constraint 8
+
+
+
+Faces
+/*key:
+NUMBER(1 is protein circle, 100 is edge of membrane,
+- to signify from one layer to the next ie 2-3)
+*/
+
+//Spherical cap (F1)
+1 1 14  -7 -13 constraint 1 fixed no_refine TENSION 0.0002
+2 2 15  -8 -14 constraint 1 fixed no_refine TENSION 0.0002
+3 3 16  -9 -15 constraint 1 fixed no_refine TENSION 0.0002
+4 4 17 -10 -16 constraint 1 fixed no_refine TENSION 0.0002
+5 5 18 -11 -17 constraint 1 fixed no_refine TENSION 0.0002
+6 6 13 -12 -18 constraint 1 fixed no_refine TENSION 0.0002
+
+//Two Circles (F1-2)
+13 28 -102 -1 101 TENSION 0.0002
+14 29 -103 -2 102 TENSION 0.0002
+15 30 -104 -3 103 TENSION 0.0002
+16 31 -105 -4 104 TENSION 0.0002
+17 32 -106 -5 105 TENSION 0.0002
+18 33 -101 -6 106 TENSION 0.0002
+
+//Outer Circle to edge constraint intermediary (F2-3)
+19 34 -108 -28 107 TENSION 0.0002
+20 35 -109 -29 108 TENSION 0.0002
+21 36 -110 -30 109 TENSION 0.0002
+22 37 -111 -31 110 TENSION 0.0002
+23 38 -112 -32 111 TENSION 0.0002
+24 39 -107 -33 112 TENSION 0.0002
+
+//Intermediary (3) to intermediary (4) (F3-4)
+25 40 -114 -34 113 TENSION 0.0002
+26 41 -115 -35 114 TENSION 0.0002
+27 42 -116 -36 115 TENSION 0.0002
+
+//Intermediary (4) to outer membrane (F4-100)
+28 25 -118 -40 117 TENSION 0.0002
+29 26 -119 -41 118 TENSION 0.0002
+30 27 -120 -42 119 TENSION 0.0002
+
+
+
+read
+
+r :::= { flute_count *= 2; flutey_count *= 2; 'r' }
+//refine edge :::= { flute_count *= 2; flutey_count *= 2; 'refine edge'}
+

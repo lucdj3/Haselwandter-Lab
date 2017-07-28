@@ -1,0 +1,4 @@
+This folder contains the Surface Evolver-ready files produced by 'runall.py' for the 1 inclusion system.
+These files are ready to be opened in Surface Evolver and their energy minimized. Their naming system is
+as follows: SE_[contact angle in degrees]_[radius of mesh].txt. So 'SE_1_10.txt' is a mesh with a contact
+angle of 10 degrees with the inclusion, and a radius to the outer edge of 10.

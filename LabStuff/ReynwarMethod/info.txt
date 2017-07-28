@@ -1,0 +1,5 @@
+These files are all meshes created from scratch intended to go directly into Surface Evolver, as in the
+Reynwar Method. If the issue with the 'delete edge' command had not arisen, I believe many of these would
+be fit for the Reynwar Method, 'FixedProtein14.txt' being latest and greatest. In general, there is no
+special naming pattern here, other than the higher the number, the more recent and probably somehow better
+in my experience.

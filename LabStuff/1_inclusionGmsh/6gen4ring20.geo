@@ -1,6 +1,6 @@
 cl = 1.0;
 clr = 2.0;
-factor = 0.01;
+factor = 0.1;
 z_coord = 0.0;
 distance = 1.0;
 outer = 20;
@@ -75,31 +75,25 @@ shift = 0.0;
 x_c = 0.0;
 y_c = 0.0;
 
-factor = 0.1;
+factor = 0.2;
 Call Inclusion;
 innerBoundaries[0] = currentC;
 
 r = 1.0;
-factor = 0.002;
+factor = 0.01;
 Call Inclusion;
 innerBoundaries[1] = currentC;
 
 r = 2.0;
-factor = 0.2;
+factor = 0.5;
 Call Inclusion;
 innerBoundaries[2] = currentC;
 
-r = 5.0;
-factor = 1.0;
-Call Inclusion;
-innerBoundaries[3] = currentC;
 
+Plane Surface(1)={5,innerBoundaries[2]};
+Plane Surface(2)={innerBoundaries[2],innerBoundaries[1]};
+Plane Surface(3)={innerBoundaries[1],innerBoundaries[0]};
+Plane Surface(4)={innerBoundaries[0]};
 
-Plane Surface(1)={5,innerBoundaries[3]};
-Plane Surface(2)={innerBoundaries[3],innerBoundaries[2]};
-Plane Surface(3)={innerBoundaries[2],innerBoundaries[1]};
-Plane Surface(4)={innerBoundaries[1],innerBoundaries[0]};
-Plane Surface(5)={innerBoundaries[0]};
-
-Physical Surface(6)={1,2,3,4,5};
+Physical Surface(5)={1,2,3,4};
 Mesh.Algorithm = 6;

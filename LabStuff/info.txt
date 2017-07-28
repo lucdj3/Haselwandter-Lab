@@ -1,0 +1,10 @@
+These is the main folder with the bulk of the work done for making the Osman-Lucas method possible.
+The contents that are not other folders are largely scripts that are either directly or indirectly
+used for the Osman-Lucas method in the 1 or 2 inclusion system. The folders are hopefully semi-self-
+explanatory by name, and each additionally has an 'info.txt' document to further explain itself.
+One major consideration about the scripts in this folder and the other folders: several of the scripts
+automatically append or prepend input or output file names with folders that made my life easier. If
+you are having issues or would like to change the folder architecture, make sure to look at the scripts,
+notably 'runall.py' and 'tilt_convert.py', to verify that they will still function. Additionally, the
+location of Surface Evolver is assumed by 'tilt_convert.py' to be in a folder titled 'Evolver' that
+exists in the grandparent of this folder.

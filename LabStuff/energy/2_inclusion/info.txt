@@ -1,0 +1,10 @@
+This folder contains the energy files from running 'tilt_convert.py', containing the inclusion's polar tilt
+angle (in radians), and the corresponding Surface Evolver energy.
+The general rule for naming is: [inclusion center distance]_[contact angle in degrees]_[initial polar tilt
+angle]to[final polar tilt angle]energy.csv
+That is, the file '1.5_1_0to5energy.csv' is the file for a mesh with the inclusion's center 1.5 from the
+mirror plane, with a contact angle of 1 degree, showing the corresponding energy as the polar tilt angle
+ranges from 0 to 5.
+There are a couple extra files used for testing the significance of the polar angle tilt step size, which
+is the cause for those with an additional '_.01step_' in their name (this smaller step size of 0.01 had a
+minor impact on the resulting lowest energy when compared to the 0.05 step size used for the other files).

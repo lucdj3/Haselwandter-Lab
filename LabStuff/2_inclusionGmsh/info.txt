@@ -1,0 +1,6 @@
+This folder contiains the '.geo' files needed for use of Gmsh to create 2 inclusion meshes.
+The names indicate that each is semi-circular (for mirror symmetry in the 2 inclusion system),
+the first number indicates the distance from the mirror plane of the center of the inclusion
+(which has radius 1), and the second number indicates the radius of the semi-circular mesh.
+Therefore, 'halfring_1.5_1280.geo' is a semi-circular mesh, with the inclusion centered at a
+distance of 1.5 from the mirror plane, with an outer radius of the mesh of 1280.

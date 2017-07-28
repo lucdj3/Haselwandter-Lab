@@ -1,0 +1,4 @@
+This folder contiains the '.geo' files needed for use of Gmsh to create 1 inclusion meshes.
+The names came about when testing different mesh generator methods within Gmsh (4, 5, 6),
+but all that matters now is the last number in each file name, which indicates the radius
+of the circular mesh (the outer edge radius).

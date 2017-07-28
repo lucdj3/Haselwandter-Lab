@@ -1,6 +1,6 @@
 cl = 1.0;
 clr = 120.0;
-factor = 0.01;
+factor = 0.05;
 z_coord = 0.0;
 distance = 1.0;
 outer = 1280;
@@ -75,17 +75,17 @@ shift = 0.0;
 x_c = 0.0;
 y_c = 0.0;
 
-factor = 0.1;
+factor = 0.2;
 Call Inclusion;
 innerBoundaries[0] = currentC;
 
 r = 1.0;
-factor = 0.001;
+factor = 0.04;
 Call Inclusion;
 innerBoundaries[1] = currentC;
 
 r = 2.0;
-factor = 0.1;
+factor = 0.3;
 Call Inclusion;
 innerBoundaries[2] = currentC;
 

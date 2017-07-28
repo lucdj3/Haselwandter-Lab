@@ -1,0 +1,182 @@
+
+//Curvature energy definition
+quantity starsq energy method star_sq_mean_curvature global
+
+//some definitions to make things below easier
+#define phi (pi/10)
+#define theta (pi/4)
+
+#define prodist (0) //distance of center of protein from edge of semicircle
+#define prorad  (1) //radius of the circle that will represent the protein
+#define proang  (0.0001*pi/180) //angle between z-axis and "polar" axis of protein
+#define contang (90*pi/180) //angle of contact between protein and membrane
+
+//defining values for the "sphere" that a portion of will be used to represent the protein
+#define sphrad  (prorad/sin(contang)) //radius of sphere
+#define sphcen2procen (sqrt(sphrad^2-prorad^2)) //distance between center of sphere and center of "protein cap"
+#define sphhght (-cos(proang+contang)*sphrad) //height of sphere center from x-y-plane
+#define sphdist (prodist-sphcen2procen*sin(proang)) //distance of sphere's center from x-z plane
+#define prohght (prorad*sin(proang)) //height of protein center
+#define prothk  (sphrad-sphcen2procen) //thickness of protein (distance from center on plane of contact circle to top of protein cap)
+
+
+//defining values/equations for the plane that holds the contact circle between protein and membrane
+//yplane*(y-prodist) + zplane*(z-prohght) = 0
+#define yplane (sin(proang))
+#define zplane (cos(proang))
+
+//start making values for circle of protein contacting the membrane
+#define prox1 (prorad)
+#define prox2 (prorad/2)
+#define prox3 (-prox2)
+#define prox4 (-prorad)
+#define prox5 (-prox2)
+#define prox6 (prox2)
+
+#define y2sqandz2sq (prorad^2-prox2^2) //y^2 + z^2 in the sphere's equation for 2nd point
+
+//IF proang is 90, comment out this next line and uncomment y2sq=0 line
+#define y2sq (y2sqandz2sq/(1+yplane^2/zplane^2)) //y^2 in sphere's equation for 2nd point
+//#define y2sq (0)
+
+//IF proang is 0, comment out this next line and uncomment z2sq=0 line
+#define z2sq (y2sqandz2sq/(1+zplane^2/yplane^2)) //z^2 in sphere's equation for 2nd point
+//#define z2sq (0)
+
+
+#define proy1 (prodist)
+#define proy2 (sqrt(y2sq)+prodist)
+#define proy3 (proy2)
+#define proy4 (prodist)
+#define proy5 (-sqrt(y2sq)+prodist)
+#define proy6 (proy5)
+
+#define proz1 (prohght)
+#define proz2 (-sqrt(z2sq)+prohght)
+#define proz3 (proz2)
+#define proz4 (prohght)
+#define proz5 (sqrt(z2sq)+prohght)
+#define proz6 (proz5)
+
+
+//start defining upper part of protein vertices
+//the first 6 will be creating a circle on a plane parallel to the contact circle plane, but halfway to the top of the protein cap
+//yplane*(y-prodist-yplane*prothk/2) + zplane*(z-prohght-zplane*prothk/2) = 0
+/*
+#define topprox1 (
+#define topprox2 (
+#define topprox3 (
+#define topprox4 (
+#define topprox5 (
+#define topprox6 (
+
+#define topproy1 (
+#define topproy2 (
+#define topproy3 (
+#define topproy4 (
+#define topproy5 (
+#define topproy6 (
+
+#define topproz1 (
+#define topproz2 (
+#define topproz3 (
+#define topproz4 (
+#define topproz5 (
+#define topproz6 (
+*/
+
+
+//Constraints for Protein
+
+constraint 1 //"sphere" for which the cap represents the protein
+formula: x^2 + (y-sphdist)^2 + (z-sphhght)^2 = (sphrad)^2
+
+constraint 2 //plane that the base of protein is constrainted to
+formula: yplane*(y-prodist) + zplane*(z-prohght) = 0
+
+parameter flutey_count=3
+constraint 3 //invisible flutes that prevent circle vertices of protein from "short-circuiting"
+formula: sin(flutey_count*atan2(zplane*(y-prodist)-yplane*(z-prohght),x))
+
+
+Vertices
+
+//Protein base (0)
+1 prox1 proy1 proz1 constraint 1,2,3
+2 prox2 proy2 proz2 constraint 1,2,3
+3 prox3 proy3 proz3 constraint 1,2,3
+4 prox4 proy4 proz4 constraint 1,2,3
+5 prox5 proy5 proz5 constraint 1,2,3
+6 prox6 proy6 proz6 constraint 1,2,3
+
+//Upper part of protein to create contact angle
+/*7  prox1/2 (proy1-prodist)/2+prodist (proz1-prohght)/2+prohght //constraint 1//,3 fixed
+8  prox2/2 (proy2-prodist)/2+prodist (proz2-prohght)/2+prohght //constraint 1//,3 fixed
+9  prox3/2 (proy3-prodist)/2+prodist (proz3-prohght)/2+prohght //constraint 1//,3 fixed
+10 prox4/2 (proy4-prodist)/2+prodist (proz4-prohght)/2+prohght //constraint 1//,3 fixed
+11 prox5/2 (proy5-prodist)/2+prodist (proz5-prohght)/2+prohght //constraint 1//,3 fixed
+12 prox6/2 (proy6-prodist)/2+prodist (proz6-prohght)/2+prohght //constraint 1//,3 fixed
+*/
+13 0       prodist+prothk*yplane      prohght+zplane*prothk    constraint 1
+
+14 -5  0  0
+15  5  0  0
+16  0 -5  0
+17  0  5  0
+18  0  0 -5
+19  0  0  5
+
+20 0 sphdist sphhght
+21 sphrad sphdist sphhght constraint 1
+22 -sphrad sphdist sphhght constraint 1
+23 0 sphdist+sphrad sphhght constraint 1
+24 0 sphdist-sphrad sphhght constraint 1
+25 0 sphdist sphhght+sphrad constraint 1
+26 0 sphdist sphhght-sphrad constraint 1
+
+
+
+Edges
+
+1 1 2 constraint 1,2,3
+2 2 3 constraint 1,2,3
+3 3 4 constraint 1,2,3
+4 4 5 constraint 1,2,3
+5 5 6 constraint 1,2,3
+6 6 1 constraint 1,2,3
+
+13 1 13 constraint 1
+14 2 13 constraint 1
+15 3 13 constraint 1
+16 4 13 constraint 1
+17 5 13 constraint 1
+18 6 13 constraint 1
+
+19 14 15 color(blue)
+20 16 17 color(green)
+21 18 19 color(red)
+
+22 20 21
+23 20 22
+24 20 23
+25 20 24
+26 20 25
+27 20 26
+
+
+
+Faces
+
+1 1 14 -13 constraint 1
+2 2 15 -14 constraint 1
+3 3 16 -15 constraint 1
+4 4 17 -16 constraint 1
+5 5 18 -17 constraint 1
+6 6 13 -18 constraint 1
+
+read
+
+r :::= { /*flute_count *= 2*/; flutey_count *= 2; 'r' }
+//refine edge :::= { flute_count *= 2; flutey_count *= 2; 'refine edge'}
+
+

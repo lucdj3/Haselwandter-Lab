@@ -1,0 +1,123 @@
+parameter angle = 45 //taken from ExMoundInitial
+
+#define LOWERT  (-cos(angle*pi/180)) //taken from ExMoundInitial
+
+constraint 1
+formula: x^2 + y^2 = 1000000
+
+constraint 2
+formula: x^2 + (y-5)^2 = 9
+energy:
+e1: -LOWERT*(y-5)*z/10
+e2: LOWERT*x*z/10
+e3: 0
+
+
+parameter flute_count = 3
+constraint 3
+formula: sin(flute_count*atan2(y,x))
+
+constraint 4
+formula: z = 0
+
+parameter flutey_count = 3
+constraint 5
+formula: sin(flutey_count*atan2(y,x)+1*pi/6)
+
+constraint 6
+formula: y = 0
+
+constraint 7
+formula: z = -12
+
+vertices
+1 1000*cos(0*pi/3) 1000*sin(0*pi/3) 0 constraint 1,4,3
+2 1000*cos(1*pi/3) 1000*sin(1*pi/3) 0 constraint 1,4,3
+3 1000*cos(2*pi/3) 1000*sin(2*pi/3) 0 constraint 1,4,3
+4 1000*cos(3*pi/3) 1000*sin(3*pi/3) 0 constraint 1,4,3
+5 0               0                 0 constraint 6
+
+6  3*cos(0*pi/3)  3*sin(0*pi/3)+5  12 constraint 2,7
+7  3*cos(1*pi/3)  3*sin(1*pi/3)+5  12 constraint 2,7
+8  3*cos(2*pi/3)  3*sin(2*pi/3)+5  12 constraint 2,7
+9  3*cos(3*pi/3)  3*sin(3*pi/3)+5  12 constraint 2,7
+10 3*cos(4*pi/3)  3*sin(4*pi/3)+5  12 constraint 2,7
+11 3*cos(5*pi/3)  3*sin(5*pi/3)+5  12 constraint 2,7
+
+12 100*cos(0*pi/3) 100*sin(0*pi/3) 0 constraint 6
+13 100*cos(1*pi/3) 100*sin(1*pi/3) 0
+14 100*cos(2*pi/3) 100*sin(2*pi/3) 0
+15 100*cos(3*pi/3) 100*sin(3*pi/3) 0 constraint 6
+
+16 333*cos(0*pi/3) 333*sin(0*pi/3) 0 constraint 6
+17 333*cos(1*pi/3) 333*sin(1*pi/3) 0
+18 333*cos(2*pi/3) 333*sin(2*pi/3) 0
+19 333*cos(3*pi/3) 333*sin(3*pi/3) 0 constraint 6
+
+
+edges
+
+1 1 2 constraint 4,3,1
+2 2 3 constraint 1,4,3
+3 3 4 constraint 1,4,3
+
+6   6  7 constraint 2
+7   7  8 constraint 2
+8   8  9 constraint 2
+9   9 10 constraint 2
+10 10 11 constraint 2
+11 11  6 constraint 2
+
+12 12 6
+13 13 7
+14 14 8
+15 15 9
+16 5 10
+17 5 11
+
+18 12 13
+19 13 14
+20 14 15
+
+21 15 5 constraint 6
+22 5 12 constraint 6
+
+23 16 12 constraint 6
+24 17 13
+25 18 14
+26 19 15 constraint 6
+
+27 1 16 constraint 6
+28 2 17
+29 3 18
+30 4 19 constraint 6
+
+31 16 17
+32 17 18
+33 18 19
+
+
+faces
+
+1 18 13  -6 -12
+2 19 14  -7 -13
+3 20 15  -8 -14
+4 21 16  -9 -15
+5 22 12 -11 -17
+6 10   -17  16
+
+7 31 24 -18 -23
+8 32 25 -19 -24
+9 33 26 -20 -25
+
+10 1 28 -31 -27
+11 2 29 -32 -28
+12 3 30 -33 -29
+
+13 6 7 8 9 10 11
+
+
+read
+
+r :::= { flute_count *= 2; flutey_count *= 2; 'r' }
+//refine edge :::= { flute_count *= 2; flutey_count *= 2; 'refine edge'}

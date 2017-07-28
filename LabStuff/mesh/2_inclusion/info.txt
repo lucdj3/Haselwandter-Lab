@@ -1,0 +1,12 @@
+This folder contains the final mesh files from running 'tilt_convert.py', which can be opened in Surface
+Evolver to survey the mesh at it's steepest polar tilt angle. Keep in mind that these files will generally
+have a few lines appended to them that quit from Surface Evolver just after opening. To examine the meshes,
+you must go into the mesh text file, delete the 4 lines at the bottom ('E', 'E', 'dump', 'q'), and then
+it will be ready to be opened as standard.
+The general rule for naming is: [inclusion center distance]_[contact angle in degrees]_[initial polar tilt
+angle]to[final polar tilt angle]mesh.txt
+That is, the file '1.5_1_0to5mesh.txt' is the file with a mesh with the inclusion's center 1.5 from the
+mirror plane, with a contact angle of 1 degree, and a polar tilt angle of 5 degrees, having arrived here
+via steps starting at a polar tilt angle of 0 degrees.
+Similar to the energy folder, there are a couple extra files used for testing the significance of the polar
+angle tilt step size, which is the cause for those with an additional '_.01step_' in their name.
